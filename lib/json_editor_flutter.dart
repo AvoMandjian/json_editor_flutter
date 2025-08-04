@@ -73,6 +73,7 @@ class JsonEditor extends StatefulWidget {
     this.searchDuration = const Duration(milliseconds: 500),
     this.hideEditorsMenuButton = false,
     this.hideTopBar = false,
+    this.topBarWidget,
     this.expandedObjects = const [],
   }) : assert(editors.length > 0, "editors list cannot be empty");
 
@@ -114,6 +115,8 @@ class JsonEditor extends StatefulWidget {
 
   /// Hides the top bar. Defaults to `false`.
   final bool hideTopBar;
+
+  final Widget? topBarWidget;
 
   /// [expandedObjects] refers to the objects that will be expanded by
   /// default. Index can be provided when the data is a List.
@@ -417,6 +420,7 @@ class _JsonEditorState extends State<JsonEditor> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (widget.topBarWidget != null) widget.topBarWidget!,
             if (!widget.hideTopBar)
               DecoratedBox(
                 decoration: BoxDecoration(
