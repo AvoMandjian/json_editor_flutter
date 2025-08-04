@@ -1,7 +1,7 @@
 library json_editor_flutter;
 
-import 'dart:convert';
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -72,6 +72,7 @@ class JsonEditor extends StatefulWidget {
     this.enableHorizontalScroll = false,
     this.searchDuration = const Duration(milliseconds: 500),
     this.hideEditorsMenuButton = false,
+    this.hideTopBar = false,
     this.expandedObjects = const [],
   }) : assert(editors.length > 0, "editors list cannot be empty");
 
@@ -110,6 +111,9 @@ class JsonEditor extends StatefulWidget {
 
   /// Hides the option of changing editor. Defaults to `false`.
   final bool hideEditorsMenuButton;
+
+  /// Hides the top bar. Defaults to `false`.
+  final bool hideTopBar;
 
   /// [expandedObjects] refers to the objects that will be expanded by
   /// default. Index can be provided when the data is a List.
@@ -413,125 +417,126 @@ class _JsonEditorState extends State<JsonEditor> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            DecoratedBox(
-              decoration: BoxDecoration(
-                  color: _themeColor,
-                  border: _onError
-                      ? const Border(
-                          bottom: BorderSide(color: Colors.red, width: 2),
-                        )
-                      : null),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 6,
-                  horizontal: 10,
-                ),
-                child: Row(
-                  children: [
-                    if (!widget.hideEditorsMenuButton)
-                      PopupMenuButton<Editors>(
-                        initialValue: _editor,
-                        tooltip: 'Change editor',
-                        padding: EdgeInsets.zero,
-                        onSelected: (value) {
-                          if (value == Editors.text) {
+            if (!widget.hideTopBar)
+              DecoratedBox(
+                decoration: BoxDecoration(
+                    color: _themeColor,
+                    border: _onError
+                        ? const Border(
+                            bottom: BorderSide(color: Colors.red, width: 2),
+                          )
+                        : null),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 6,
+                    horizontal: 10,
+                  ),
+                  child: Row(
+                    children: [
+                      if (!widget.hideEditorsMenuButton)
+                        PopupMenuButton<Editors>(
+                          initialValue: _editor,
+                          tooltip: 'Change editor',
+                          padding: EdgeInsets.zero,
+                          onSelected: (value) {
+                            if (value == Editors.text) {
+                              _controller.text = _stringifyData(_data, 0, true);
+                            }
+                            setState(() {
+                              _editor = value;
+                            });
+                          },
+                          position: PopupMenuPosition.under,
+                          enabled: widget.editors.length > 1,
+                          constraints: const BoxConstraints(
+                            minWidth: 50,
+                            maxWidth: 150,
+                          ),
+                          itemBuilder: (context) {
+                            return <PopupMenuEntry<Editors>>[
+                              PopupMenuItem<Editors>(
+                                height: _popupMenuHeight,
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 12),
+                                enabled: widget.editors.contains(Editors.tree),
+                                value: Editors.tree,
+                                child: const Text("Tree"),
+                              ),
+                              PopupMenuItem<Editors>(
+                                height: _popupMenuHeight,
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 12),
+                                enabled: widget.editors.contains(Editors.text),
+                                value: Editors.text,
+                                child: const Text("Text"),
+                              ),
+                            ];
+                          },
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(_editor.name, style: _textStyle),
+                              const Icon(Icons.arrow_drop_down, size: 20),
+                            ],
+                          ),
+                        ),
+                      const Spacer(),
+                      if (_editor == Editors.text) ...[
+                        const SizedBox(width: 20),
+                        InkWell(
+                          onTap: () {
                             _controller.text = _stringifyData(_data, 0, true);
-                          }
-                          setState(() {
-                            _editor = value;
-                          });
-                        },
-                        position: PopupMenuPosition.under,
-                        enabled: widget.editors.length > 1,
-                        constraints: const BoxConstraints(
-                          minWidth: 50,
-                          maxWidth: 150,
+                          },
+                          child: const Tooltip(
+                            message: 'Format',
+                            child: Icon(Icons.format_align_left, size: 20),
+                          ),
                         ),
-                        itemBuilder: (context) {
-                          return <PopupMenuEntry<Editors>>[
-                            PopupMenuItem<Editors>(
-                              height: _popupMenuHeight,
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 12),
-                              enabled: widget.editors.contains(Editors.tree),
-                              value: Editors.tree,
-                              child: const Text("Tree"),
-                            ),
-                            PopupMenuItem<Editors>(
-                              height: _popupMenuHeight,
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 12),
-                              enabled: widget.editors.contains(Editors.text),
-                              value: Editors.text,
-                              child: const Text("Text"),
-                            ),
-                          ];
-                        },
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(_editor.name, style: _textStyle),
-                            const Icon(Icons.arrow_drop_down, size: 20),
-                          ],
+                      ] else ...[
+                        const SizedBox(width: 20),
+                        if (_results != null) ...[
+                          Text("$_results results"),
+                          const SizedBox(width: 5),
+                        ],
+                        _SearchField(onSearch, onSearchAction),
+                        const SizedBox(width: 20),
+                        InkWell(
+                          onTap: () {
+                            _expandedObjects[["object"].toString()] = true;
+                            expandAllObjects(_data, ["object"]);
+                            setState(() {});
+                          },
+                          child: const Tooltip(
+                            message: 'Expand All',
+                            child: Icon(Icons.expand, size: 20),
+                          ),
                         ),
-                      ),
-                    const Spacer(),
-                    if (_editor == Editors.text) ...[
-                      const SizedBox(width: 20),
-                      InkWell(
-                        onTap: () {
-                          _controller.text = _stringifyData(_data, 0, true);
-                        },
-                        child: const Tooltip(
-                          message: 'Format',
-                          child: Icon(Icons.format_align_left, size: 20),
+                        const SizedBox(width: 20),
+                        InkWell(
+                          onTap: () {
+                            _expandedObjects.clear();
+                            setState(() {});
+                          },
+                          child: const Tooltip(
+                            message: 'Collapse All',
+                            child: Icon(Icons.compress, size: 20),
+                          ),
                         ),
-                      ),
-                    ] else ...[
-                      const SizedBox(width: 20),
-                      if (_results != null) ...[
-                        Text("$_results results"),
-                        const SizedBox(width: 5),
                       ],
-                      _SearchField(onSearch, onSearchAction),
                       const SizedBox(width: 20),
                       InkWell(
-                        onTap: () {
-                          _expandedObjects[["object"].toString()] = true;
-                          expandAllObjects(_data, ["object"]);
-                          setState(() {});
-                        },
+                        onTap: copyData,
                         child: const Tooltip(
-                          message: 'Expand All',
-                          child: Icon(Icons.expand, size: 20),
+                          message: 'Copy',
+                          child: Icon(Icons.copy, size: 20),
                         ),
                       ),
-                      const SizedBox(width: 20),
-                      InkWell(
-                        onTap: () {
-                          _expandedObjects.clear();
-                          setState(() {});
-                        },
-                        child: const Tooltip(
-                          message: 'Collapse All',
-                          child: Icon(Icons.compress, size: 20),
-                        ),
-                      ),
+                      if (widget.actions.isNotEmpty) const SizedBox(width: 20),
+                      ...widget.actions,
                     ],
-                    const SizedBox(width: 20),
-                    InkWell(
-                      onTap: copyData,
-                      child: const Tooltip(
-                        message: 'Copy',
-                        child: Icon(Icons.copy, size: 20),
-                      ),
-                    ),
-                    if (widget.actions.isNotEmpty) const SizedBox(width: 20),
-                    ...widget.actions,
-                  ],
+                  ),
                 ),
               ),
-            ),
             if (_editor == Editors.tree)
               Expanded(
                 child: SingleChildScrollView(
@@ -1042,7 +1047,7 @@ class _ReplaceTextWithFieldState extends State<_ReplaceTextWithField> {
             });
             _focusNode.requestFocus();
           },
-          mouseCursor: MaterialStateMouseCursor.textable,
+          mouseCursor: WidgetStateMouseCursor.textable,
           child: widget.initialValue is String && _text.isEmpty
               ? const SizedBox(width: 200, height: 18)
               : wrapWithColoredBox(_text),
