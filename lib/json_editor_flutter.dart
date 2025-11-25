@@ -74,6 +74,7 @@ class JsonEditor extends StatefulWidget {
     this.hideEditorsMenuButton = false,
     this.hideTopBar = false,
     this.topBarWidget,
+    this.readOnly = false,
     this.expandedObjects = const [],
   }) : assert(editors.length > 0, "editors list cannot be empty");
 
@@ -117,6 +118,8 @@ class JsonEditor extends StatefulWidget {
   final bool hideTopBar;
 
   final Widget? topBarWidget;
+
+  final bool readOnly;
 
   /// [expandedObjects] refers to the objects that will be expanded by
   /// default. Index can be provided when the data is a List.
@@ -569,6 +572,7 @@ class _JsonEditorState extends State<JsonEditor> {
                   onChanged: parseData,
                   maxLines: null,
                   minLines: null,
+                  readOnly: widget.readOnly,
                   expands: true,
                   textAlignVertical: TextAlignVertical.top,
                   decoration: const InputDecoration(
