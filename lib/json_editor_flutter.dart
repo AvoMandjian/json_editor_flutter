@@ -109,19 +109,19 @@ class JsonEditor extends StatefulWidget {
   final JinjaIconModel? previousButtonIconModel;
 
   /// Shows the format button. Defaults to `true`.
-  final bool showFormatButton;
+  final bool? showFormatButton;
 
   /// Shows the search field. Defaults to `true`.
-  final bool showSearchField;
+  final bool? showSearchField;
 
   /// Shows the expand all button. Defaults to `true`.
-  final bool showExpandAllButton;
+  final bool? showExpandAllButton;
 
   /// Shows the collapse all button. Defaults to `true`.
-  final bool showCollapseAllButton;
+  final bool? showCollapseAllButton;
 
   /// Shows the copy button. Defaults to `true`.
-  final bool showCopyButton;
+  final bool? showCopyButton;
 
   /// JSON string to be edited.
   final String json;
@@ -534,8 +534,9 @@ class _JsonEditorState extends State<JsonEditor> {
                         ),
                       const Spacer(),
                       if (_editor == Editors.text) ...[
-                        if (widget.showFormatButton) const SizedBox(width: 20),
-                        if (widget.showFormatButton)
+                        if (widget.showFormatButton ?? true)
+                          const SizedBox(width: 20),
+                        if (widget.showFormatButton ?? true)
                           InkWell(
                             onTap: () {
                               _controller.text = _stringifyData(_data, 0, true);
@@ -554,16 +555,16 @@ class _JsonEditorState extends State<JsonEditor> {
                           Text("$_results results"),
                           const SizedBox(width: 5),
                         ],
-                        if (widget.showSearchField)
+                        if (widget.showSearchField ?? true)
                           _SearchField(
                             onSearch,
                             onSearchAction,
                             widget.previousButtonIconModel,
                             widget.nextButtonIconModel,
                           ),
-                        if (widget.showExpandAllButton)
+                        if (widget.showExpandAllButton ?? true)
                           const SizedBox(width: 20),
-                        if (widget.showExpandAllButton)
+                        if (widget.showExpandAllButton ?? true)
                           InkWell(
                             onTap: () {
                               _expandedObjects[["object"].toString()] = true;
@@ -579,9 +580,9 @@ class _JsonEditorState extends State<JsonEditor> {
                                   : Icon(Icons.expand, size: 20),
                             ),
                           ),
-                        if (widget.showCollapseAllButton)
+                        if (widget.showCollapseAllButton ?? true)
                           const SizedBox(width: 20),
-                        if (widget.showCollapseAllButton)
+                        if (widget.showCollapseAllButton ?? true)
                           InkWell(
                             onTap: () {
                               _expandedObjects.clear();
@@ -597,8 +598,9 @@ class _JsonEditorState extends State<JsonEditor> {
                             ),
                           ),
                       ],
-                      if (widget.showCopyButton) const SizedBox(width: 20),
-                      if (widget.showCopyButton)
+                      if (widget.showCopyButton ?? true)
+                        const SizedBox(width: 20),
+                      if (widget.showCopyButton ?? true)
                         InkWell(
                           onTap: copyData,
                           child: Tooltip(
