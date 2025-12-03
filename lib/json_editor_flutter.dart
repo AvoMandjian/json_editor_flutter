@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:jinja_app_widgets_catalog/jinja_app_widgets_catalog.dart';
 
 const _space = 18.0;
 const _textStyle = TextStyle(fontSize: 16);
@@ -75,7 +76,51 @@ class JsonEditor extends StatefulWidget {
     this.hideTopBar = false,
     this.topBarWidget,
     this.expandedObjects = const [],
+    this.copyButtonIconModel,
+    this.formatButtonIconModel,
+    this.expandAllButtonIconModel,
+    this.collapseAllButtonIconModel,
+    this.nextButtonIconModel,
+    this.previousButtonIconModel,
+    this.showFormatButton = true,
+    this.showSearchField = true,
+    this.showExpandAllButton = true,
+    this.showCollapseAllButton = true,
+    this.showCopyButton = true,
   }) : assert(editors.length > 0, "editors list cannot be empty");
+
+  /// Icon model for the copy button.
+  final JinjaIconModel? copyButtonIconModel;
+
+  /// Icon model for the format button.
+  final JinjaIconModel? formatButtonIconModel;
+
+  /// Icon model for the expand all button.
+  final JinjaIconModel? expandAllButtonIconModel;
+
+  /// Icon model for the collapse all button.
+  final JinjaIconModel? collapseAllButtonIconModel;
+
+  /// Icon model for the next button.
+  final JinjaIconModel? nextButtonIconModel;
+
+  /// Icon model for the previous button.
+  final JinjaIconModel? previousButtonIconModel;
+
+  /// Shows the format button. Defaults to `true`.
+  final bool showFormatButton;
+
+  /// Shows the search field. Defaults to `true`.
+  final bool showSearchField;
+
+  /// Shows the expand all button. Defaults to `true`.
+  final bool showExpandAllButton;
+
+  /// Shows the collapse all button. Defaults to `true`.
+  final bool showCollapseAllButton;
+
+  /// Shows the copy button. Defaults to `true`.
+  final bool showCopyButton;
 
   /// JSON string to be edited.
   final String json;
@@ -486,55 +531,81 @@ class _JsonEditorState extends State<JsonEditor> {
                         ),
                       const Spacer(),
                       if (_editor == Editors.text) ...[
-                        const SizedBox(width: 20),
-                        InkWell(
-                          onTap: () {
-                            _controller.text = _stringifyData(_data, 0, true);
-                          },
-                          child: const Tooltip(
-                            message: 'Format',
-                            child: Icon(Icons.format_align_left, size: 20),
+                        if (widget.showFormatButton) const SizedBox(width: 20),
+                        if (widget.showFormatButton)
+                          InkWell(
+                            onTap: () {
+                              _controller.text = _stringifyData(_data, 0, true);
+                            },
+                            child: Tooltip(
+                              message: 'Format',
+                              child: widget.formatButtonIconModel != null
+                                  ? JinjaIcon(
+                                      iconModel: widget.formatButtonIconModel!)
+                                  : Icon(Icons.format_align_left, size: 20),
+                            ),
                           ),
-                        ),
                       ] else ...[
                         const SizedBox(width: 20),
                         if (_results != null) ...[
                           Text("$_results results"),
                           const SizedBox(width: 5),
                         ],
-                        _SearchField(onSearch, onSearchAction),
-                        const SizedBox(width: 20),
-                        InkWell(
-                          onTap: () {
-                            _expandedObjects[["object"].toString()] = true;
-                            expandAllObjects(_data, ["object"]);
-                            setState(() {});
-                          },
-                          child: const Tooltip(
-                            message: 'Expand All',
-                            child: Icon(Icons.expand, size: 20),
+                        if (widget.showSearchField)
+                          _SearchField(
+                            onSearch,
+                            onSearchAction,
+                            widget.previousButtonIconModel,
+                            widget.nextButtonIconModel,
                           ),
-                        ),
-                        const SizedBox(width: 20),
-                        InkWell(
-                          onTap: () {
-                            _expandedObjects.clear();
-                            setState(() {});
-                          },
-                          child: const Tooltip(
-                            message: 'Collapse All',
-                            child: Icon(Icons.compress, size: 20),
+                        if (widget.showExpandAllButton)
+                          const SizedBox(width: 20),
+                        if (widget.showExpandAllButton)
+                          InkWell(
+                            onTap: () {
+                              _expandedObjects[["object"].toString()] = true;
+                              expandAllObjects(_data, ["object"]);
+                              setState(() {});
+                            },
+                            child: Tooltip(
+                              message: 'Expand All',
+                              child: widget.expandAllButtonIconModel != null
+                                  ? JinjaIcon(
+                                      iconModel:
+                                          widget.expandAllButtonIconModel!)
+                                  : Icon(Icons.expand, size: 20),
+                            ),
                           ),
-                        ),
+                        if (widget.showCollapseAllButton)
+                          const SizedBox(width: 20),
+                        if (widget.showCollapseAllButton)
+                          InkWell(
+                            onTap: () {
+                              _expandedObjects.clear();
+                              setState(() {});
+                            },
+                            child: Tooltip(
+                              message: 'Collapse All',
+                              child: widget.collapseAllButtonIconModel != null
+                                  ? JinjaIcon(
+                                      iconModel:
+                                          widget.collapseAllButtonIconModel!)
+                                  : Icon(Icons.compress, size: 20),
+                            ),
+                          ),
                       ],
-                      const SizedBox(width: 20),
-                      InkWell(
-                        onTap: copyData,
-                        child: const Tooltip(
-                          message: 'Copy',
-                          child: Icon(Icons.copy, size: 20),
+                      if (widget.showCopyButton) const SizedBox(width: 20),
+                      if (widget.showCopyButton)
+                        InkWell(
+                          onTap: copyData,
+                          child: Tooltip(
+                            message: 'Copy',
+                            child: widget.copyButtonIconModel != null
+                                ? JinjaIcon(
+                                    iconModel: widget.copyButtonIconModel!)
+                                : Icon(Icons.copy, size: 20),
+                          ),
                         ),
-                      ),
                       if (widget.actions.isNotEmpty) const SizedBox(width: 20),
                       ...widget.actions,
                     ],
@@ -1205,10 +1276,13 @@ class _PopupMenuWidgetState extends State<_PopupMenuWidget> {
 }
 
 class _SearchField extends StatelessWidget {
+  final JinjaIconModel? previousButtonIconModel;
+  final JinjaIconModel? nextButtonIconModel;
   final ValueChanged<String> onChanged;
   final ValueChanged<_SearchActions> onAction;
 
-  const _SearchField(this.onChanged, this.onAction);
+  const _SearchField(this.onChanged, this.onAction,
+      this.previousButtonIconModel, this.nextButtonIconModel);
 
   @override
   Widget build(BuildContext context) {
@@ -1244,12 +1318,14 @@ class _SearchField extends StatelessWidget {
             onTap: () {
               onAction(_SearchActions.next);
             },
-            child: const Tooltip(
+            child: Tooltip(
               message: 'Next',
-              child: Icon(
-                CupertinoIcons.arrowtriangle_down_fill,
-                size: 20,
-              ),
+              child: nextButtonIconModel != null
+                  ? JinjaIcon(iconModel: nextButtonIconModel!)
+                  : Icon(
+                      CupertinoIcons.arrowtriangle_down_fill,
+                      size: 20,
+                    ),
             ),
           ),
           const SizedBox(width: 2),
@@ -1257,12 +1333,14 @@ class _SearchField extends StatelessWidget {
             onTap: () {
               onAction(_SearchActions.prev);
             },
-            child: const Tooltip(
+            child: Tooltip(
               message: 'Previous',
-              child: Icon(
-                CupertinoIcons.arrowtriangle_up_fill,
-                size: 20,
-              ),
+              child: previousButtonIconModel != null
+                  ? JinjaIcon(iconModel: previousButtonIconModel!)
+                  : Icon(
+                      CupertinoIcons.arrowtriangle_up_fill,
+                      size: 20,
+                    ),
             ),
           ),
           const SizedBox(width: 5),
