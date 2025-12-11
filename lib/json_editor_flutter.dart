@@ -88,6 +88,7 @@ class JsonEditor extends StatefulWidget {
     this.showExpandAllButton = true,
     this.showCollapseAllButton = true,
     this.showCopyButton = true,
+    this.jinjaDropdownJson,
   }) : assert(editors.length > 0, "editors list cannot be empty");
 
   /// Icon model for the copy button.
@@ -158,6 +159,9 @@ class JsonEditor extends StatefulWidget {
 
   /// Hides the option of changing editor. Defaults to `false`.
   final bool hideEditorsMenuButton;
+
+  /// Jinja dropdown json.
+  final Map<String, dynamic>? jinjaDropdownJson;
 
   /// Hides the top bar. Defaults to `false`.
   final bool hideTopBar;
@@ -485,7 +489,25 @@ class _JsonEditorState extends State<JsonEditor> {
                   ),
                   child: Row(
                     children: [
-                      if (!widget.hideEditorsMenuButton)
+                      if (!widget.hideEditorsMenuButton &&
+                          widget.jinjaDropdownJson != null &&
+                          widget.jinjaDropdownJson!.isNotEmpty)
+                        JinjaDropdown(
+                          selectedLabel: _editor.name,
+                          jsonOut: (selectedItem, outData) {
+                            Editors value =
+                                widget.editors.firstWhere((element) {
+                              return element.name == selectedItem?.id;
+                            });
+                            _controller.text = _stringifyData(_data, 0, true);
+                            setState(() {
+                              _editor = value;
+                            });
+                          },
+                        ).fromJson(widget.jinjaDropdownJson!),
+                      if (!widget.hideEditorsMenuButton &&
+                          (widget.jinjaDropdownJson == null ||
+                              widget.jinjaDropdownJson!.isEmpty))
                         PopupMenuButton<Editors>(
                           initialValue: _editor,
                           tooltip: 'Change editor',
