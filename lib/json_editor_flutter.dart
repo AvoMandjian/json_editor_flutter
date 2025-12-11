@@ -492,19 +492,21 @@ class _JsonEditorState extends State<JsonEditor> {
                       if (!widget.hideEditorsMenuButton &&
                           widget.jinjaDropdownJson != null &&
                           widget.jinjaDropdownJson!.isNotEmpty)
-                        JinjaDropdown(
-                          selectedLabel: _editor.name,
-                          jsonOut: (selectedItem, outData) {
-                            Editors value =
-                                widget.editors.firstWhere((element) {
-                              return element.name == selectedItem?.id;
-                            });
-                            _controller.text = _stringifyData(_data, 0, true);
-                            setState(() {
-                              _editor = value;
-                            });
-                          },
-                        ).fromJson(widget.jinjaDropdownJson!),
+                        Expanded(
+                          child: JinjaDropdown(
+                            selectedLabel: _editor.name,
+                            jsonOut: (selectedItem, outData) {
+                              Editors value =
+                                  widget.editors.firstWhere((element) {
+                                return element.name == selectedItem?.id;
+                              });
+                              _controller.text = _stringifyData(_data, 0, true);
+                              setState(() {
+                                _editor = value;
+                              });
+                            },
+                          ).fromJson(widget.jinjaDropdownJson!),
+                        ),
                       if (!widget.hideEditorsMenuButton &&
                           (widget.jinjaDropdownJson == null ||
                               widget.jinjaDropdownJson!.isEmpty))
