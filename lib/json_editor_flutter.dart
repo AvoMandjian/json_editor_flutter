@@ -492,7 +492,11 @@ class _JsonEditorState extends State<JsonEditor> {
                       if (!widget.hideEditorsMenuButton &&
                           widget.jinjaDropdownJson != null &&
                           widget.jinjaDropdownJson!.isNotEmpty)
-                        Expanded(
+                        SizedBox(
+                          width: widget.jinjaDropdownJson?['property_settings']
+                              ['width']['value'],
+                          height: widget.jinjaDropdownJson?['property_settings']
+                              ['height']['value'],
                           child: JinjaDropdown(
                             selectedLabel: _editor.name,
                             jsonOut: (selectedItem, outData) {
